@@ -26,7 +26,7 @@
     <p id="status"></p>
 
     <script>
-      const supabase = window.supabase.createClient(
+      const supabaseClient = window.supabase.createClient(
         "https://kzuzhcpfaacvfdkkxmep.supabase.co",
         "sb_publishable_fFe1RnAHa42dRlterZYB6w_47viQRxX",
       );
@@ -36,13 +36,13 @@
       // Supabase JS client auto-detects the recovery token from the URL on load
       // by default (detectSessionInUrl defaults to true for the web client),
       // but we confirm it actually landed:
-      supabase.auth.onAuthStateChange((event, session) => {
+      supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === "PASSWORD_RECOVERY") {
           statusEl.innerText = "Ready — enter your new password.";
         }
       });
 
-      supabase.auth.getSession().then(({ data, error }) => {
+      supabaseClient.auth.getSession().then(({ data, error }) => {
         if (error)
           statusEl.innerText = "Error loading session: " + error.message;
         if (!data.session)
