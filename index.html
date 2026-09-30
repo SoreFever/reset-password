@@ -1,29 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>Reset Password</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body style="font-family: sans-serif; max-width: 400px; margin: 60px auto; padding: 0 16px;">
-  <h2>Reset your password</h2>
-  <input id="password" type="password" placeholder="New password" style="width: 100%; padding: 10px; margin-bottom: 10px;" />
-  <button id="submit" style="width: 100%; padding: 10px;">Update Password</button>
-  <p id="status"></p>
+  <head>
+    <meta charset="utf-8" />
+    <title>Reset Password</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body
+    style="
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 60px auto;
+      padding: 0 16px;
+    "
+  >
+    <h2>Reset your password</h2>
+    <input
+      id="password"
+      type="password"
+      placeholder="New password"
+      style="width: 100%; padding: 10px; margin-bottom: 10px"
+    />
+    <button id="submit" style="width: 100%; padding: 10px">
+      Update Password
+    </button>
+    <p id="status"></p>
 
-  <script>
-    const supabase = window.supabase.createClient(
-      'https://kzuzhcpfaacvfdkkxmep.supabase.co',
-      'sb_publishable_fFe1RnAHa42dRlterZYB6w_47viQRxX'
-    )
+    <script>
+      const supabase = window.supabase.createClient(
+        "https://kzuzhcpfaacvfdkkxmep.supabase.co",
+        "sb_publishable_fFe1RnAHa42dRlterZYB6w_47viQRxX",
+      );
 
-    document.getElementById('submit').onclick = async () => {
-      const password = document.getElementById('password').value
-      const { error } = await supabase.auth.updateUser({ password })
-      document.getElementById('status').innerText = error
-        ? error.message
-        : 'Password updated! You can close this page and log in on the app.'
-    }
-  </script>
-</body>
+      const statusEl = document.getElementById("status");
+
+      // Supabase JS client auto-detects the recovery token from the URL on load
+      // by default (detectSessionInUrl defaults to true for the web client),
+      // but we confirm it actually landed:
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          statusEl.innerText = "Ready — enter your new password.";
+        }
+      });
+
+      supabase.auth.getSession().then(({ data, error }) => {
+        if (error)
+          statusEl.innerText = "Error loading session: " + error.message;
+        if (!data.session)
+          statusEl.innerText =
+            "No recovery session found — link may be expired.";
+      });
+
+      document.getElementById("submit").onclick = async () => {
+        statusEl.innerText = "Updating...";
+        const password = document.getElementById("password").value;
+        const { error } = await supabase.auth.updateUser({ password });
+        statusEl.innerText = error
+          ? "Error: " + error.message
+          : "Password updated! You can close this page and log in on the app.";
+      };
+    </script>
+  </body>
 </html>
