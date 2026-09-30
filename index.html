@@ -53,7 +53,7 @@
       document.getElementById("submit").onclick = async () => {
         statusEl.innerText = "Updating...";
         const password = document.getElementById("password").value;
-        const { error } = await supabase.auth.updateUser({ password });
+        const { error } = await supabaseClient.auth.updateUser({ password });
         statusEl.innerText = error
           ? "Error: " + error.message
           : "Password updated! You can close this page and log in on the app.";
