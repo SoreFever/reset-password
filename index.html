@@ -14,12 +14,63 @@
     "
   >
     <h2>Reset your password</h2>
-    <input
-      id="password"
-      type="password"
-      placeholder="New password"
-      style="width: 100%; padding: 10px; margin-bottom: 10px"
-    />
+
+    <div style="position: relative; margin-bottom: 10px">
+      <input
+        id="password"
+        type="password"
+        placeholder="New password"
+        style="
+          width: 100%;
+          padding: 10px;
+          padding-right: 60px;
+          box-sizing: border-box;
+        "
+      />
+      <button
+        id="toggle-password"
+        type="button"
+        style="
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          transform: translateY(-50%);
+          padding: 4px 8px;
+          font-size: 12px;
+        "
+      >
+        Show
+      </button>
+    </div>
+
+    <div style="position: relative; margin-bottom: 10px">
+      <input
+        id="confirm-password"
+        type="password"
+        placeholder="Confirm new password"
+        style="
+          width: 100%;
+          padding: 10px;
+          padding-right: 60px;
+          box-sizing: border-box;
+        "
+      />
+      <button
+        id="toggle-confirm-password"
+        type="button"
+        style="
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          transform: translateY(-50%);
+          padding: 4px 8px;
+          font-size: 12px;
+        "
+      >
+        Show
+      </button>
+    </div>
+
     <button id="submit" style="width: 100%; padding: 10px">
       Update Password
     </button>
@@ -32,6 +83,20 @@
       );
 
       const statusEl = document.getElementById("status");
+      const passwordEl = document.getElementById("password");
+      const confirmPasswordEl = document.getElementById("confirm-password");
+
+      function setupToggle(buttonId, inputEl) {
+        const button = document.getElementById(buttonId);
+        button.onclick = () => {
+          const isHidden = inputEl.type === "password";
+          inputEl.type = isHidden ? "text" : "password";
+          button.innerText = isHidden ? "Hide" : "Show";
+        };
+      }
+
+      setupToggle("toggle-password", passwordEl);
+      setupToggle("toggle-confirm-password", confirmPasswordEl);
 
       // Supabase JS client auto-detects the recovery token from the URL on load
       // by default (detectSessionInUrl defaults to true for the web client),
@@ -51,8 +116,19 @@
       });
 
       document.getElementById("submit").onclick = async () => {
+        const password = passwordEl.value;
+        const confirmPassword = confirmPasswordEl.value;
+
+        if (password.length < 6) {
+          statusEl.innerText = "Password must be at least 6 characters.";
+          return;
+        }
+        if (password !== confirmPassword) {
+          statusEl.innerText = "Passwords don't match.";
+          return;
+        }
+
         statusEl.innerText = "Updating...";
-        const password = document.getElementById("password").value;
         const { error } = await supabaseClient.auth.updateUser({ password });
         statusEl.innerText = error
           ? "Error: " + error.message
